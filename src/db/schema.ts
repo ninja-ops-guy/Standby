@@ -1,5 +1,7 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
   integer,
   pgTable,
@@ -133,6 +135,7 @@ export const marketplaceTransactions = pgTable(
     uniqueIndex("marketplace_transactions_correlation_unique").on(t.correlationId),
     index("marketplace_transactions_listing_idx").on(t.listingId),
     index("marketplace_transactions_state_idx").on(t.state),
+    check("marketplace_transaction_amount_positive", sql`${t.amountCents} > 0`),
   ],
 );
 
@@ -182,6 +185,8 @@ export const ledgerEntries = pgTable(
     index("ledger_transaction_idx").on(t.marketplaceTransactionId),
     index("ledger_account_idx").on(t.account),
     index("ledger_correlation_idx").on(t.correlationId),
+    check("ledger_amount_positive", sql`${t.amountCents} > 0`),
+    check("ledger_direction_valid", sql`${t.direction} in (\'debit\', \'credit\')`),
   ],
 );
 
