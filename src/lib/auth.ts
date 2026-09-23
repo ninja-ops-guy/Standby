@@ -84,13 +84,7 @@ export async function destroySession(): Promise<void> {
 }
 
 export async function revokeAllSessions(userId: number): Promise<void> {
-  await db.transaction(async (tx) => {
-    await tx
-      .update(users)
-      .set({ sessionVersion: users.sessionVersion })
-      .where(eq(users.id, userId));
-    await tx.delete(sessions).where(eq(sessions.userId, userId));
-  });
+  await db.delete(sessions).where(eq(sessions.userId, userId));
 }
 
 export async function bumpSessionVersionAndRevoke(userId: number): Promise<void> {
