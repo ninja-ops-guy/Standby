@@ -329,6 +329,148 @@ export const transferEvidence = pgTable(
   ],
 );
 
+export const sellerPaymentAccounts = pgTable(
+  "seller_payment_accounts",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    provider: text("provider").notNull(),
+    providerAccountReference: text("provider_account_reference").notNull(),
+    onboardingStatus: text("onboarding_status").notNull().default("pending"),
+    payoutsEnabled: boolean("payouts_enabled").notNull().default(false),
+    country: text("country").notNull().default(""),
+    currency: text("currency").notNull().default("USD"),
+    metadataJson: text("metadata_json").notNull().default("{}"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("seller_payment_account_user_provider_unique").on(t.userId, t.provider),
+    uniqueIndex("seller_payment_account_provider_ref_unique").on(
+      t.provider,
+      t.providerAccountReference,
+    ),
+    check(
+      "seller_payment_account_status_valid",
+      sql`${t.onboardingStatus} in ('pending', 'restricted', 'enabled', 'disabled')`,
+    ),
+  ],
+);
+
+export const paymentOperations = pgTable(
+  "payment_operations",
+  {
+    id: serial("id").primaryKey(),
+    marketplaceTransactionId: integer("marketplace_transaction_id")
+      .notNull()
+      .references(() => marketplaceTransactions.id, { onDelete: "restrict" }),
+    provider: text("provider").notNull(),
+    operation: text("operation").notNull(),
+    state: text("state").notNull().default("pending"),
+    amountCents: integer("amount_cents").notNull(),
+    currency: text("currency").notNull().default("USD"),
+    idempotencyKey: text("idempotency_key").notNull(),
+    providerReference: text("provider_reference"),
+    failureCode: text("failure_code"),
+    failureMessage: text("failure_message"),
+    metadataJson: text("metadata_json").notNull().default("{}"),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("payment_operation_idempotency_unique").on(t.idempotencyKey),
+    index("payment_operation_tx_idx").on(t.marketplaceTransactionId),
+    index("payment_operation_provider_ref_idx").on(t.provider, t.providerReference),
+    check("payment_operation_amount_positive", sql`${t.amountCents} > 0`),
+    check(
+      "payment_operation_type_valid",
+      sql`${t.operation} in (
+        'authorize',
+        'capture',
+        'cancel_authorization',
+        'refund',
+        'seller_transfer'
+      )`,
+    ),
+    check(
+      "payment_operation_state_valid",
+      sql`${t.state} in ('pending', 'succeeded', 'failed')`,
+    ),
+  ],
+);
+
+export const paymentProviderEvents = pgTable(
+  "payment_provider_events",
+  {
+    id: serial("id").primaryKey(),
+    provider: text("provider").notNull(),
+    providerEventId: text("provider_event_id").notNull(),
+    eventType: text("event_type").notNull(),
+    signatureDigest: text("signature_digest").notNull(),
+    payloadDigest: text("payload_digest").notNull(),
+    normalizedPayloadJson: text("normalized_payload_json").notNull().default("{}"),
+    status: text("status").notNull().default("received"),
+    attempts: integer("attempts").notNull().default(0),
+    lastError: text("last_error"),
+    correlationId: text("correlation_id").notNull(),
+    receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("payment_provider_event_unique").on(t.provider, t.providerEventId),
+    index("payment_provider_event_status_idx").on(t.status, t.nextAttemptAt),
+    index("payment_provider_event_correlation_idx").on(t.correlationId),
+    check("payment_provider_event_attempts_nonnegative", sql`${t.attempts} >= 0`),
+    check(
+      "payment_provider_event_status_valid",
+      sql`${t.status} in ('received', 'processing', 'processed', 'failed', 'dead_letter')`,
+    ),
+  ],
+);
+
+export const paymentReconciliationFindings = pgTable(
+  "payment_reconciliation_findings",
+  {
+    id: serial("id").primaryKey(),
+    provider: text("provider").notNull(),
+    marketplaceTransactionId: integer("marketplace_transaction_id").references(
+      () => marketplaceTransactions.id,
+      { onDelete: "restrict" },
+    ),
+    externalReference: text("external_reference").notNull(),
+    findingType: text("finding_type").notNull(),
+    status: text("status").notNull().default("open"),
+    expectedJson: text("expected_json").notNull().default("{}"),
+    observedJson: text("observed_json").notNull().default("{}"),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("payment_reconciliation_status_idx").on(t.status),
+    index("payment_reconciliation_external_idx").on(t.provider, t.externalReference),
+    check(
+      "payment_reconciliation_type_valid",
+      sql`${t.findingType} in (
+        'missing_local',
+        'missing_provider',
+        'amount_mismatch',
+        'state_mismatch',
+        'duplicate',
+        'other'
+      )`,
+    ),
+    check(
+      "payment_reconciliation_status_valid",
+      sql`${t.status} in ('open', 'resolved', 'ignored')`,
+    ),
+  ],
+);
+
 export const auditEvents = pgTable(
   "audit_events",
   {
@@ -359,3 +501,7 @@ export type ReservationPolicy = typeof reservationPolicies.$inferSelect;
 export type ListingPolicyBinding = typeof listingPolicyBindings.$inferSelect;
 export type TransactionPolicySnapshot = typeof transactionPolicySnapshots.$inferSelect;
 export type TransferEvidence = typeof transferEvidence.$inferSelect;
+export type SellerPaymentAccount = typeof sellerPaymentAccounts.$inferSelect;
+export type PaymentOperation = typeof paymentOperations.$inferSelect;
+export type PaymentProviderEvent = typeof paymentProviderEvents.$inferSelect;
+export type PaymentReconciliationFinding = typeof paymentReconciliationFindings.$inferSelect;
