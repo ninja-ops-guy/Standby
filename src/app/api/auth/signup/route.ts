@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { transactions, users } from "@/db/schema";
 import { createSession, hashPassword } from "@/lib/auth";
 import { SIGNUP_BONUS_CENTS } from "@/lib/money";
+import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +19,29 @@ export async function POST(req: Request) {
   const password = body.password ?? "";
   const city = (body.city ?? "").trim();
 
+  try {
+    await enforceRateLimit({
+      req,
+      scope: "auth:signup",
+      subject: email,
+      limit: 5,
+      windowSeconds: 600,
+    });
+  } catch (error) {
+    if (error instanceof RateLimitError) {
+      return Response.json(
+        { error: "Too many signup attempts." },
+        { status: 429, headers: { "Retry-After": String(error.retryAfterSeconds) } },
+      );
+    }
+    throw error;
+  }
+
   if (name.length < 2) return Response.json({ error: "Please enter your name." }, { status: 400 });
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     return Response.json({ error: "Enter a valid email address." }, { status: 400 });
-  if (password.length < 6)
-    return Response.json({ error: "Password must be at least 6 characters." }, { status: 400 });
+  if (password.length < 10)
+    return Response.json({ error: "Password must be at least 10 characters." }, { status: 400 });
 
   const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1);
   if (existing.length > 0)
@@ -49,5 +68,5 @@ export async function POST(req: Request) {
   });
 
   await createSession(user.id);
-  return Response.json({ ok: true });
+  return Response.json({ ok: true, emailVerified: false });
 }
