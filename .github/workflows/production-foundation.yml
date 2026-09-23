@@ -1,0 +1,67 @@
+name: Production Foundation Qualification
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/db/schema.ts"
+      - "src/lib/ledger.ts"
+      - "src/lib/production-transactions.ts"
+      - "src/lib/transaction-state.ts"
+      - "scripts/qualify-transaction-*.mjs"
+      - "package.json"
+      - ".github/workflows/production-foundation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: standby
+          POSTGRES_PASSWORD: standby
+          POSTGRES_DB: standby_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U standby -d standby_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://standby:standby@127.0.0.1:5432/standby_test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Structural transaction qualification
+        run: npm run qualify:transaction
+
+      - name: Apply schema to ephemeral PostgreSQL
+        run: npx drizzle-kit push --force
+
+      - name: Runtime transaction qualification
+        run: node scripts/qualify-transaction-runtime.mjs
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
