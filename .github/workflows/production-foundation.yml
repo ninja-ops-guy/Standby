@@ -13,9 +13,16 @@ on:
       - "src/lib/transfer-policy.ts"
       - "src/lib/payments/**"
       - "src/app/api/payments/**"
+      - "src/lib/disputes.ts"
+      - "src/lib/operator-auth.ts"
+      - "src/app/admin/**"
+      - "src/app/api/admin/**"
+      - "src/app/api/disputes/**"
+      - "src/components/admin-controls.tsx"
       - "scripts/qualify-transaction-*.mjs"
       - "scripts/qualify-transfer-policy-*.mjs"
       - "scripts/qualify-payment-foundation-*.mjs"
+      - "scripts/qualify-disputes-admin-*.mjs"
       - "package.json"
       - ".github/workflows/production-foundation.yml"
   workflow_dispatch:
@@ -76,6 +83,12 @@ jobs:
 
       - name: Runtime payment foundation qualification
         run: node scripts/qualify-payment-foundation-runtime.mjs
+
+      - name: Structural disputes/admin qualification
+        run: npm run qualify:disputes
+
+      - name: Runtime disputes/admin qualification
+        run: node scripts/qualify-disputes-admin-runtime.mjs
 
       - name: Typecheck
         run: npm run typecheck
