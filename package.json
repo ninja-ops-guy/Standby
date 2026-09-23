@@ -12,7 +12,8 @@
     "qualify:transaction": "node scripts/qualify-transaction-model.mjs",
     "qualify:transfer-policy": "node scripts/qualify-transfer-policy-model.mjs",
     "qualify:payments": "node scripts/qualify-payment-foundation-model.mjs",
-    "qualify:disputes": "node scripts/qualify-disputes-admin-model.mjs"
+    "qualify:disputes": "node scripts/qualify-disputes-admin-model.mjs",
+    "qualify:security": "node scripts/qualify-security-baseline-model.mjs"
   },
   "dependencies": {
     "dotenv": "17.3.1",
