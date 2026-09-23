@@ -100,7 +100,7 @@ export function AuthForm() {
           type="password"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
-          placeholder="Password (6+ characters)"
+          placeholder="Password (10+ characters)"
           className={cls}
         />
         {mode === "signup" && (
