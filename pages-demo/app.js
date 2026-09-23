@@ -1,1 +1,2 @@
 document.querySelectorAll("[data-static-notice]").forEach((el)=>{el.addEventListener("click",(event)=>{event.preventDefault();alert("This GitHub Pages build mirrors the real Standby frontend. The live auth, database, escrow, wallet, and API actions require the server-backed deployment.");});});
+// Pages redeploy trigger: 2026-09-22
