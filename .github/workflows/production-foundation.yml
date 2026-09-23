@@ -19,10 +19,18 @@ on:
       - "src/app/api/admin/**"
       - "src/app/api/disputes/**"
       - "src/components/admin-controls.tsx"
+      - "src/lib/auth.ts"
+      - "src/lib/auth-tokens.ts"
+      - "src/lib/rate-limit.ts"
+      - "src/lib/email/**"
+      - "src/app/api/auth/**"
+      - "src/proxy.ts"
+      - "next.config.ts"
       - "scripts/qualify-transaction-*.mjs"
       - "scripts/qualify-transfer-policy-*.mjs"
       - "scripts/qualify-payment-foundation-*.mjs"
       - "scripts/qualify-disputes-admin-*.mjs"
+      - "scripts/qualify-security-baseline-*.mjs"
       - "package.json"
       - ".github/workflows/production-foundation.yml"
   workflow_dispatch:
@@ -50,6 +58,8 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://standby:standby@127.0.0.1:5432/standby_test
+      APP_ORIGIN: http://localhost:3000
+      RATE_LIMIT_SECRET: qualification-rate-limit-secret
 
     steps:
       - name: Checkout
@@ -62,6 +72,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Structural transaction qualification
         run: npm run qualify:transaction
@@ -90,8 +103,17 @@ jobs:
       - name: Runtime disputes/admin qualification
         run: node scripts/qualify-disputes-admin-runtime.mjs
 
+      - name: Structural security baseline qualification
+        run: npm run qualify:security
+
+      - name: Runtime security baseline qualification
+        run: node scripts/qualify-security-baseline-runtime.mjs
+
       - name: Typecheck
         run: npm run typecheck
 
       - name: Lint
         run: npm run lint
+
+      - name: Production build
+        run: npm run build
