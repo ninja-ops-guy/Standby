@@ -471,6 +471,213 @@ export const paymentReconciliationFindings = pgTable(
   ],
 );
 
+export const userRoles = pgTable(
+  "user_roles",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    role: text("role").notNull(),
+    grantedByUserId: integer("granted_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("user_role_unique").on(t.userId, t.role),
+    check("user_role_valid", sql`${t.role} in ('operator', 'admin')`),
+  ],
+);
+
+export const disputes = pgTable(
+  "disputes",
+  {
+    id: serial("id").primaryKey(),
+    marketplaceTransactionId: integer("marketplace_transaction_id")
+      .notNull()
+      .references(() => marketplaceTransactions.id, { onDelete: "restrict" }),
+    openedByUserId: integer("opened_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    reasonCode: text("reason_code").notNull(),
+    status: text("status").notNull().default("open"),
+    resolution: text("resolution"),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("dispute_transaction_unique").on(t.marketplaceTransactionId),
+    index("dispute_status_idx").on(t.status),
+    check(
+      "dispute_reason_valid",
+      sql`${t.reasonCode} in (
+        'transfer_denied',
+        'provider_policy',
+        'invalid_booking',
+        'duplicate_listing',
+        'seller_cancelled',
+        'upstream_cancellation',
+        'buyer_dispute',
+        'other'
+      )`,
+    ),
+    check(
+      "dispute_status_valid",
+      sql`${t.status} in (
+        'open',
+        'evidence_requested',
+        'under_review',
+        'resolved_buyer',
+        'resolved_seller',
+        'cancelled'
+      )`,
+    ),
+  ],
+);
+
+export const disputeEvidence = pgTable(
+  "dispute_evidence",
+  {
+    id: serial("id").primaryKey(),
+    disputeId: integer("dispute_id")
+      .notNull()
+      .references(() => disputes.id, { onDelete: "restrict" }),
+    submittedByUserId: integer("submitted_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    evidenceType: text("evidence_type").notNull(),
+    payloadDigest: text("payload_digest").notNull(),
+    metadataJson: text("metadata_json").notNull().default("{}"),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("dispute_evidence_digest_unique").on(t.disputeId, t.payloadDigest),
+    index("dispute_evidence_dispute_idx").on(t.disputeId),
+    check(
+      "dispute_evidence_type_valid",
+      sql`${t.evidenceType} in (
+        'buyer_statement',
+        'seller_statement',
+        'provider_response',
+        'attachment_digest',
+        'operator_note'
+      )`,
+    ),
+  ],
+);
+
+export const payoutHolds = pgTable(
+  "payout_holds",
+  {
+    id: serial("id").primaryKey(),
+    marketplaceTransactionId: integer("marketplace_transaction_id")
+      .notNull()
+      .references(() => marketplaceTransactions.id, { onDelete: "restrict" }),
+    sellerId: integer("seller_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    amountCents: integer("amount_cents").notNull(),
+    reason: text("reason").notNull(),
+    status: text("status").notNull().default("active"),
+    createdByUserId: integer("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    releasedByUserId: integer("released_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    releasedAt: timestamp("released_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("payout_hold_transaction_unique").on(t.marketplaceTransactionId),
+    index("payout_hold_status_idx").on(t.status),
+    check("payout_hold_amount_positive", sql`${t.amountCents} > 0`),
+    check("payout_hold_status_valid", sql`${t.status} in ('active', 'released')`),
+  ],
+);
+
+export const refundDecisions = pgTable(
+  "refund_decisions",
+  {
+    id: serial("id").primaryKey(),
+    marketplaceTransactionId: integer("marketplace_transaction_id")
+      .notNull()
+      .references(() => marketplaceTransactions.id, { onDelete: "restrict" }),
+    disputeId: integer("dispute_id").references(() => disputes.id, { onDelete: "restrict" }),
+    amountCents: integer("amount_cents").notNull(),
+    reasonCode: text("reason_code").notNull(),
+    status: text("status").notNull().default("proposed"),
+    proposedByUserId: integer("proposed_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    approvedByUserId: integer("approved_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    paymentOperationId: integer("payment_operation_id").references(() => paymentOperations.id, { onDelete: "restrict" }),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    executedAt: timestamp("executed_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("refund_decision_transaction_unique").on(t.marketplaceTransactionId),
+    index("refund_decision_status_idx").on(t.status),
+    check("refund_decision_amount_positive", sql`${t.amountCents} > 0`),
+    check(
+      "refund_decision_status_valid",
+      sql`${t.status} in ('proposed', 'approved', 'executed', 'rejected')`,
+    ),
+  ],
+);
+
+export const accountRestrictions = pgTable(
+  "account_restrictions",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    restrictionType: text("restriction_type").notNull(),
+    status: text("status").notNull().default("active"),
+    reason: text("reason").notNull(),
+    createdByUserId: integer("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    liftedByUserId: integer("lifted_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    liftedAt: timestamp("lifted_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("account_restriction_unique").on(t.userId, t.restrictionType),
+    check(
+      "account_restriction_type_valid",
+      sql`${t.restrictionType} in ('marketplace_suspension', 'payout_suspension')`,
+    ),
+    check("account_restriction_status_valid", sql`${t.status} in ('active', 'lifted')`),
+  ],
+);
+
+export const listingRestrictions = pgTable(
+  "listing_restrictions",
+  {
+    id: serial("id").primaryKey(),
+    listingId: integer("listing_id")
+      .notNull()
+      .references(() => listings.id, { onDelete: "restrict" }),
+    status: text("status").notNull().default("active"),
+    reason: text("reason").notNull(),
+    createdByUserId: integer("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    liftedByUserId: integer("lifted_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    liftedAt: timestamp("lifted_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("listing_restriction_unique").on(t.listingId),
+    check("listing_restriction_status_valid", sql`${t.status} in ('active', 'lifted')`),
+  ],
+);
+
 export const auditEvents = pgTable(
   "audit_events",
   {
@@ -505,3 +712,10 @@ export type SellerPaymentAccount = typeof sellerPaymentAccounts.$inferSelect;
 export type PaymentOperation = typeof paymentOperations.$inferSelect;
 export type PaymentProviderEvent = typeof paymentProviderEvents.$inferSelect;
 export type PaymentReconciliationFinding = typeof paymentReconciliationFindings.$inferSelect;
+export type UserRole = typeof userRoles.$inferSelect;
+export type Dispute = typeof disputes.$inferSelect;
+export type DisputeEvidence = typeof disputeEvidence.$inferSelect;
+export type PayoutHold = typeof payoutHolds.$inferSelect;
+export type RefundDecision = typeof refundDecisions.$inferSelect;
+export type AccountRestriction = typeof accountRestrictions.$inferSelect;
+export type ListingRestriction = typeof listingRestrictions.$inferSelect;
