@@ -1,6 +1,5 @@
-import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { transactions, users } from "@/db/schema";
+import { transactions } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { MarketError, requestPayout, topUpWallet } from "@/lib/market";
 import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
@@ -53,5 +52,3 @@ export async function POST(req: Request) {
   }
 }
 
-void eq;
-void users;
