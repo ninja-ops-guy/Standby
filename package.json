@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "qualify:transaction": "node scripts/qualify-transaction-model.mjs"
   },
   "dependencies": {
     "dotenv": "17.3.1",
