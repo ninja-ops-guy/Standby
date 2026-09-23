@@ -475,12 +475,13 @@ export async function resolveDispute(input: {
 }
 
 export async function getOperatorDashboard() {
-  const [openDisputes, activeHolds, webhookFailures, reconciliation] = await Promise.all([
+  const [openDisputes, activeHolds, pendingRefunds, webhookFailures, reconciliation] = await Promise.all([
     db.select().from(disputes).where(inArray(disputes.status, ["open", "evidence_requested", "under_review"])).orderBy(desc(disputes.createdAt)).limit(25),
     db.select().from(payoutHolds).where(eq(payoutHolds.status, "active")).orderBy(desc(payoutHolds.createdAt)).limit(25),
+    db.select().from(refundDecisions).where(inArray(refundDecisions.status, ["proposed", "approved"])).orderBy(desc(refundDecisions.createdAt)).limit(25),
     db.select().from(paymentProviderEvents).where(inArray(paymentProviderEvents.status, ["failed", "dead_letter"])).orderBy(desc(paymentProviderEvents.receivedAt)).limit(25),
     db.select().from(paymentReconciliationFindings).where(eq(paymentReconciliationFindings.status, "open")).orderBy(desc(paymentReconciliationFindings.createdAt)).limit(25),
   ]);
 
-  return { openDisputes, activeHolds, webhookFailures, reconciliation };
+  return { openDisputes, activeHolds, pendingRefunds, webhookFailures, reconciliation };
 }
