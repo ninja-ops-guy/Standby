@@ -10,7 +10,9 @@ on:
       - "src/lib/ledger.ts"
       - "src/lib/production-transactions.ts"
       - "src/lib/transaction-state.ts"
+      - "src/lib/transfer-policy.ts"
       - "scripts/qualify-transaction-*.mjs"
+      - "scripts/qualify-transfer-policy-*.mjs"
       - "package.json"
       - ".github/workflows/production-foundation.yml"
   workflow_dispatch:
@@ -59,6 +61,12 @@ jobs:
 
       - name: Runtime transaction qualification
         run: node scripts/qualify-transaction-runtime.mjs
+
+      - name: Structural transfer-policy qualification
+        run: npm run qualify:transfer-policy
+
+      - name: Runtime transfer-policy qualification
+        run: node scripts/qualify-transfer-policy-runtime.mjs
 
       - name: Typecheck
         run: npm run typecheck
