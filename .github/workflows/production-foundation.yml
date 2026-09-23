@@ -11,8 +11,11 @@ on:
       - "src/lib/production-transactions.ts"
       - "src/lib/transaction-state.ts"
       - "src/lib/transfer-policy.ts"
+      - "src/lib/payments/**"
+      - "src/app/api/payments/**"
       - "scripts/qualify-transaction-*.mjs"
       - "scripts/qualify-transfer-policy-*.mjs"
+      - "scripts/qualify-payment-foundation-*.mjs"
       - "package.json"
       - ".github/workflows/production-foundation.yml"
   workflow_dispatch:
@@ -67,6 +70,12 @@ jobs:
 
       - name: Runtime transfer-policy qualification
         run: node scripts/qualify-transfer-policy-runtime.mjs
+
+      - name: Structural payment foundation qualification
+        run: npm run qualify:payments
+
+      - name: Runtime payment foundation qualification
+        run: node scripts/qualify-payment-foundation-runtime.mjs
 
       - name: Typecheck
         run: npm run typecheck
