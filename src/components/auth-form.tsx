@@ -100,7 +100,7 @@ export function AuthForm() {
           type="password"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
-          placeholder="Password (6+ characters)"
+          placeholder="Password (10+ characters)"
           className={cls}
         />
         {mode === "signup" && (
@@ -125,6 +125,10 @@ export function AuthForm() {
           Demo credentials: demo@standby.club / standby123 ·{" "}
           <Link href="/browse" className="text-slate-400 hover:text-white">
             browse as guest
+          </Link>
+          {" · "}
+          <Link href="/forgot-password" className="text-slate-400 hover:text-white">
+            forgot password
           </Link>
         </p>
       </form>

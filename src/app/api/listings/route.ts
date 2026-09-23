@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { MarketError, createListing, runMaintenance } from "@/lib/market";
+import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,13 @@ export async function POST(req: Request) {
     return Response.json({ error: "Pick a valid date and time." }, { status: 400 });
 
   try {
+    await enforceRateLimit({
+      req,
+      scope: "marketplace:create-listing",
+      subject: String(user.id),
+      limit: 12,
+      windowSeconds: 300,
+    });
     await runMaintenance();
     const id = await createListing(user.id, {
       title: (b.title ?? "").trim(),
@@ -27,6 +35,11 @@ export async function POST(req: Request) {
     });
     return Response.json({ ok: true, id });
   } catch (e) {
+    if (e instanceof RateLimitError)
+      return Response.json(
+        { error: e.message },
+        { status: 429, headers: { "Retry-After": String(e.retryAfterSeconds) } },
+      );
     if (e instanceof MarketError) return Response.json({ error: e.message }, { status: 400 });
     return Response.json({ error: "Could not create the listing." }, { status: 500 });
   }

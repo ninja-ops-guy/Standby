@@ -1,8 +1,8 @@
+import { db } from "@/db";
+import { transactions } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { MarketError, requestPayout, topUpWallet } from "@/lib/market";
-import { db } from "@/db";
-import { transactions, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { enforceRateLimit, RateLimitError } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +13,14 @@ export async function POST(req: Request) {
   const body = (await req.json()) as { action?: string; amountCents?: number };
 
   try {
+    await enforceRateLimit({
+      req,
+      scope: "financial:wallet",
+      subject: String(user.id),
+      limit: 15,
+      windowSeconds: 60,
+    });
+
     if (body.action === "topup") {
       const amount = Math.min(500000, Math.max(1000, Number(body.amountCents ?? 10000)));
       await topUpWallet(user.id, amount);
@@ -34,7 +42,13 @@ export async function POST(req: Request) {
 
     return Response.json({ error: "Unknown action." }, { status: 400 });
   } catch (e) {
+    if (e instanceof RateLimitError)
+      return Response.json(
+        { error: e.message },
+        { status: 429, headers: { "Retry-After": String(e.retryAfterSeconds) } },
+      );
     if (e instanceof MarketError) return Response.json({ error: e.message }, { status: 400 });
     return Response.json({ error: "Wallet action failed." }, { status: 500 });
   }
 }
+

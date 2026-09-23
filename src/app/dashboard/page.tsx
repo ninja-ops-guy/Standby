@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { WalletActions } from "@/components/wallet-actions";
+import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { getCurrentUser } from "@/lib/auth";
 import { categoryMeta } from "@/lib/categories";
 import {
@@ -30,6 +31,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-10">
+      {!user.emailVerifiedAt && <EmailVerificationBanner />}
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
         <div className="glass rounded-3xl p-6">
           <div className="text-xs uppercase tracking-widest text-slate-500">Standby wallet</div>

@@ -23,6 +23,9 @@ export const users = pgTable(
     lifetimeSavedCents: integer("lifetime_saved_cents").notNull().default(0),
     lifetimeRecoveredCents: integer("lifetime_recovered_cents").notNull().default(0),
     isDemo: boolean("is_demo").notNull().default(false),
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+    sessionVersion: integer("session_version").notNull().default(0),
+    passwordUpdatedAt: timestamp("password_updated_at", { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_unique").on(t.email)],
@@ -36,9 +39,47 @@ export const sessions = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    sessionVersion: integer("session_version").notNull().default(0),
+    lastRotatedAt: timestamp("last_rotated_at", { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("sessions_user_idx").on(t.userId)],
+);
+
+export const authTokens = pgTable(
+  "auth_tokens",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    purpose: text("purpose").notNull(),
+    tokenDigest: text("token_digest").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("auth_token_digest_unique").on(t.tokenDigest),
+    index("auth_token_user_purpose_idx").on(t.userId, t.purpose),
+    check("auth_token_purpose_valid", sql`${t.purpose} in ('email_verification', 'password_reset')`),
+  ],
+);
+
+export const rateLimitBuckets = pgTable(
+  "rate_limit_buckets",
+  {
+    id: serial("id").primaryKey(),
+    bucketKey: text("bucket_key").notNull(),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+    count: integer("count").notNull().default(0),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    uniqueIndex("rate_limit_bucket_unique").on(t.bucketKey, t.windowStart),
+    index("rate_limit_expiry_idx").on(t.expiresAt),
+    check("rate_limit_count_nonnegative", sql`${t.count} >= 0`),
+  ],
 );
 
 export const listings = pgTable(
@@ -697,6 +738,8 @@ export const auditEvents = pgTable(
 );
 
 export type User = typeof users.$inferSelect;
+export type AuthToken = typeof authTokens.$inferSelect;
+export type RateLimitBucket = typeof rateLimitBuckets.$inferSelect;
 export type Listing = typeof listings.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type Payout = typeof payouts.$inferSelect;

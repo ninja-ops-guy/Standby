@@ -216,6 +216,7 @@ export async function seedDatabase(): Promise<void> {
         passwordHash,
         balanceCents: 0,
         isDemo: true,
+        emailVerifiedAt: new Date(),
       })),
     )
     .returning({ id: users.id });
@@ -229,6 +230,7 @@ export async function seedDatabase(): Promise<void> {
       passwordHash,
       balanceCents: 48000,
       isDemo: true,
+      emailVerifiedAt: new Date(),
     })
     .returning({ id: users.id });
 
