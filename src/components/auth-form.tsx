@@ -126,6 +126,10 @@ export function AuthForm() {
           <Link href="/browse" className="text-slate-400 hover:text-white">
             browse as guest
           </Link>
+          {" · "}
+          <Link href="/forgot-password" className="text-slate-400 hover:text-white">
+            forgot password
+          </Link>
         </p>
       </form>
     </div>
