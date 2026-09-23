@@ -141,8 +141,8 @@ export async function addDisputeEvidence(input: {
   return row ?? null;
 }
 
-async function assertOperator(tx: Parameters<Parameters<typeof db.transaction>[0]>[0], userId: number) {
-  const roles = await tx
+async function assertOperatorUser(userId: number) {
+  const roles = await db
     .select({ role: userRoles.role })
     .from(userRoles)
     .where(and(eq(userRoles.userId, userId), inArray(userRoles.role, ["operator", "admin"])))
@@ -158,8 +158,8 @@ export async function proposeRefund(input: {
   proposedByUserId: number;
   correlationId: string;
 }) {
+  await assertOperatorUser(input.proposedByUserId);
   return db.transaction(async (tx) => {
-    await assertOperator(tx, input.proposedByUserId);
 
     const [marketplaceTx] = await tx
       .select()
@@ -201,8 +201,8 @@ export async function approveRefund(input: {
   approvedByUserId: number;
   correlationId: string;
 }) {
+  await assertOperatorUser(input.approvedByUserId);
   return db.transaction(async (tx) => {
-    await assertOperator(tx, input.approvedByUserId);
 
     const [decision] = await tx
       .select()
@@ -245,8 +245,8 @@ export async function releasePayoutHold(input: {
   releasedByUserId: number;
   correlationId: string;
 }) {
+  await assertOperatorUser(input.releasedByUserId);
   return db.transaction(async (tx) => {
-    await assertOperator(tx, input.releasedByUserId);
 
     const [released] = await tx
       .update(payoutHolds)
@@ -280,8 +280,8 @@ export async function suspendUser(input: {
   operatorUserId: number;
   correlationId: string;
 }) {
+  await assertOperatorUser(input.operatorUserId);
   return db.transaction(async (tx) => {
-    await assertOperator(tx, input.operatorUserId);
     const [restriction] = await tx
       .insert(accountRestrictions)
       .values({
@@ -311,8 +311,8 @@ export async function suspendListing(input: {
   operatorUserId: number;
   correlationId: string;
 }) {
+  await assertOperatorUser(input.operatorUserId);
   return db.transaction(async (tx) => {
-    await assertOperator(tx, input.operatorUserId);
     const [listing] = await tx.select({ id: listings.id }).from(listings).where(eq(listings.id, input.listingId)).limit(1);
     if (!listing) throw new Error("Listing not found.");
 
