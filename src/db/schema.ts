@@ -190,6 +190,145 @@ export const ledgerEntries = pgTable(
   ],
 );
 
+export const reservationPolicies = pgTable(
+  "reservation_policies",
+  {
+    id: serial("id").primaryKey(),
+    providerName: text("provider_name").notNull(),
+    bookingType: text("booking_type").notNull(),
+    jurisdiction: text("jurisdiction").notNull().default(""),
+    transferability: text("transferability").notNull().default("unknown"),
+    transferMethod: text("transfer_method").notNull().default("unknown"),
+    transferFeeCents: integer("transfer_fee_cents"),
+    deadlineRule: text("deadline_rule").notNull().default(""),
+    evidenceRequirementsJson: text("evidence_requirements_json").notNull().default("[]"),
+    sourceUrl: text("source_url"),
+    sourceType: text("source_type").notNull().default("unverified"),
+    policyVersion: text("policy_version").notNull().default("r0"),
+    verifiedAt: timestamp("verified_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("reservation_policy_version_unique").on(
+      t.providerName,
+      t.bookingType,
+      t.jurisdiction,
+      t.policyVersion,
+    ),
+    index("reservation_policy_provider_idx").on(t.providerName),
+    check(
+      "reservation_policy_transferability_valid",
+      sql`${t.transferability} in ('allowed', 'conditional', 'prohibited', 'unknown')`,
+    ),
+    check(
+      "reservation_policy_method_valid",
+      sql`${t.transferMethod} in (
+        'official_digital_transfer',
+        'provider_name_change',
+        'voucher_credit',
+        'confirmation_code',
+        'unsupported',
+        'unknown'
+      )`,
+    ),
+    check(
+      "reservation_policy_fee_nonnegative",
+      sql`${t.transferFeeCents} is null or ${t.transferFeeCents} >= 0`,
+    ),
+  ],
+);
+
+export const listingPolicyBindings = pgTable(
+  "listing_policy_bindings",
+  {
+    id: serial("id").primaryKey(),
+    listingId: integer("listing_id")
+      .notNull()
+      .references(() => listings.id, { onDelete: "restrict" }),
+    reservationPolicyId: integer("reservation_policy_id")
+      .notNull()
+      .references(() => reservationPolicies.id, { onDelete: "restrict" }),
+    boundByUserId: integer("bound_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    correlationId: text("correlation_id").notNull(),
+    boundAt: timestamp("bound_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("listing_policy_binding_listing_unique").on(t.listingId),
+    index("listing_policy_binding_policy_idx").on(t.reservationPolicyId),
+  ],
+);
+
+export const transactionPolicySnapshots = pgTable(
+  "transaction_policy_snapshots",
+  {
+    id: serial("id").primaryKey(),
+    marketplaceTransactionId: integer("marketplace_transaction_id")
+      .notNull()
+      .references(() => marketplaceTransactions.id, { onDelete: "restrict" }),
+    reservationPolicyId: integer("reservation_policy_id")
+      .notNull()
+      .references(() => reservationPolicies.id, { onDelete: "restrict" }),
+    providerName: text("provider_name").notNull(),
+    bookingType: text("booking_type").notNull(),
+    jurisdiction: text("jurisdiction").notNull().default(""),
+    transferability: text("transferability").notNull(),
+    transferMethod: text("transfer_method").notNull(),
+    transferFeeCents: integer("transfer_fee_cents"),
+    deadlineRule: text("deadline_rule").notNull().default(""),
+    evidenceRequirementsJson: text("evidence_requirements_json").notNull(),
+    sourceUrl: text("source_url"),
+    sourceType: text("source_type").notNull(),
+    policyVersion: text("policy_version").notNull(),
+    policyVerifiedAt: timestamp("policy_verified_at", { withTimezone: true }).notNull(),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("transaction_policy_snapshot_tx_unique").on(t.marketplaceTransactionId),
+    index("transaction_policy_snapshot_policy_idx").on(t.reservationPolicyId),
+  ],
+);
+
+export const transferEvidence = pgTable(
+  "transfer_evidence",
+  {
+    id: serial("id").primaryKey(),
+    marketplaceTransactionId: integer("marketplace_transaction_id")
+      .notNull()
+      .references(() => marketplaceTransactions.id, { onDelete: "restrict" }),
+    evidenceType: text("evidence_type").notNull(),
+    source: text("source").notNull(),
+    externalReference: text("external_reference"),
+    payloadDigest: text("payload_digest").notNull(),
+    metadataJson: text("metadata_json").notNull().default("{}"),
+    verificationStatus: text("verification_status").notNull().default("pending"),
+    verifiedByUserId: integer("verified_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    verifiedAt: timestamp("verified_at", { withTimezone: true }),
+    correlationId: text("correlation_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("transfer_evidence_digest_unique").on(t.marketplaceTransactionId, t.payloadDigest),
+    index("transfer_evidence_tx_idx").on(t.marketplaceTransactionId),
+    check(
+      "transfer_evidence_type_valid",
+      sql`${t.evidenceType} in (
+        'provider_receipt',
+        'buyer_acknowledgement',
+        'seller_submission',
+        'operator_verification',
+        'provider_response',
+        'other'
+      )`,
+    ),
+    check(
+      "transfer_evidence_status_valid",
+      sql`${t.verificationStatus} in ('pending', 'verified', 'rejected')`,
+    ),
+  ],
+);
+
 export const auditEvents = pgTable(
   "audit_events",
   {
@@ -216,3 +355,7 @@ export type MarketplaceTransaction = typeof marketplaceTransactions.$inferSelect
 export type TransactionStateEvent = typeof transactionStateEvents.$inferSelect;
 export type LedgerEntry = typeof ledgerEntries.$inferSelect;
 export type AuditEvent = typeof auditEvents.$inferSelect;
+export type ReservationPolicy = typeof reservationPolicies.$inferSelect;
+export type ListingPolicyBinding = typeof listingPolicyBindings.$inferSelect;
+export type TransactionPolicySnapshot = typeof transactionPolicySnapshots.$inferSelect;
+export type TransferEvidence = typeof transferEvidence.$inferSelect;
