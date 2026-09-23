@@ -65,7 +65,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
             {[
               { k: "Starts in", v: timeLeftLabel(listing.startsAt) },
               { k: "Guests", v: String(listing.partySize) },
-              { k: "Listed", v: `${Math.max(1, Math.round((Date.now() - listing.createdAt.getTime()) / 3600000))}h ago` },
+              { k: "Listed", v: `${listing.ageHours}h ago` },
               { k: "Views", v: String(listing.views) },
             ].map((d) => (
               <div key={d.k}>
