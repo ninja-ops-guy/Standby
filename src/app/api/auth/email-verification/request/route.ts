@@ -1,6 +1,3 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/db";
-import { users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { createAuthToken } from "@/lib/auth-tokens";
 import {
@@ -52,11 +49,6 @@ export async function POST(req: Request) {
     if (error instanceof EmailConfigurationError) {
       return Response.json({ error: "Email delivery is not configured." }, { status: 503 });
     }
-
-    await db
-      .update(users)
-      .set({ emailVerifiedAt: user.emailVerifiedAt })
-      .where(eq(users.id, user.id));
 
     return Response.json({ error: "Could not send verification email." }, { status: 500 });
   }
