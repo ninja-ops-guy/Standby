@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070b16" />
+  <meta name="description" content="Standby — resell the reservations you can't use." />
+  <title>Standby — resell the reservations you can't use</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: { 950:"#070b16", 900:"#0b1220", 800:"#111a2e", 700:"#1b2540" },
+            lime: { 300:"#bef264", 400:"#a3e635" }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="min-h-full bg-ink-950 text-slate-100 antialiased">
+  <div class="grid-glow min-h-screen">
+    <header class="sticky top-0 z-30 border-b border-white/10 bg-ink-950/80 backdrop-blur">
+      <div class="mx-auto flex w-full max-w-6xl items-center gap-4 px-5 py-3">
+        <a href="./" class="flex items-center gap-2">
+          <span class="grid h-8 w-8 place-items-center rounded-lg bg-lime-400 text-sm font-black text-ink-950">SB</span>
+          <span class="text-lg font-bold tracking-tight">Standby</span>
+        </a>
+        <nav class="ml-2 hidden items-center gap-1 md:flex">
+          <a href="./browse/" class="rounded-full px-3 py-1.5 text-sm text-slate-400 transition hover:text-white">Browse</a>
+          <a href="./sell/" class="rounded-full px-3 py-1.5 text-sm text-slate-400 transition hover:text-white">Sell a booking</a>
+          <a href="./login/" class="rounded-full px-3 py-1.5 text-sm text-slate-400 transition hover:text-white">Wallet</a>
+          <a href="./revenue/" class="rounded-full px-3 py-1.5 text-sm text-slate-400 transition hover:text-white">Revenue engine</a>
+        </nav>
+        <div class="ml-auto flex items-center gap-3">
+          <a href="./login/" class="rounded-full border border-white/15 px-3 py-1.5 text-sm text-slate-300 transition hover:border-white/40 hover:text-white">Log in</a>
+          <a href="./login/?mode=signup" class="rounded-full bg-lime-400 px-4 py-1.5 text-sm font-semibold text-ink-950 transition hover:bg-lime-300">Get $250 credit</a>
+        </div>
+      </div>
+      <nav class="flex items-center gap-1 overflow-x-auto px-5 pb-3 md:hidden">
+        <a href="./browse/" class="whitespace-nowrap rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">Browse</a>
+        <a href="./sell/" class="whitespace-nowrap rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">Sell a booking</a>
+        <a href="./login/" class="whitespace-nowrap rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">Wallet</a>
+        <a href="./revenue/" class="whitespace-nowrap rounded-full border border-white/10 px-3 py-1 text-xs text-slate-300">Revenue engine</a>
+      </nav>
+    </header>
+
+    <main class="mx-auto w-full max-w-6xl px-5 pb-24 pt-8">
+      <div class="space-y-20">
+        <section class="grid gap-10 pt-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+          <div>
+            <span class="inline-flex items-center gap-2 rounded-full border border-lime-400/30 bg-lime-400/10 px-3 py-1 text-xs font-medium text-lime-300">
+              <span class="h-1.5 w-1.5 rounded-full bg-lime-400"></span>
+              The resale market for bookings that never had one
+            </span>
+            <h1 class="mt-5 text-4xl font-black leading-[1.05] tracking-tight sm:text-6xl">
+              Your non-refundable booking is <span class="text-lime-400">worth something.</span>
+            </h1>
+            <p class="mt-5 max-w-xl text-lg text-slate-400">
+              Every year, hundreds of billions in prepaid hotels, tastings, tee times, classes and shows
+              go unused because plans changed. Standby turns that dead capital into a live marketplace —
+              sellers recover cash, buyers save up to 60%, and the platform earns a fee on every
+              transfer without lifting a finger.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a href="./browse/" class="rounded-full bg-lime-400 px-6 py-3 font-semibold text-ink-950 transition hover:bg-lime-300">Browse live bookings</a>
+              <a href="./sell/" class="rounded-full border border-white/20 px-6 py-3 font-semibold text-white transition hover:border-white/50">Sell a booking</a>
+            </div>
+            <dl class="mt-10 grid max-w-lg grid-cols-3 gap-4">
+              <div><dt class="text-2xl font-bold text-white">$12,369.00</dt><dd class="text-xs text-slate-500">GMV transferred</dd></div>
+              <div><dt class="text-2xl font-bold text-white">41%</dt><dd class="text-xs text-slate-500">Avg. buyer saving</dd></div>
+              <div><dt class="text-2xl font-bold text-white">$1,566.16</dt><dd class="text-xs text-slate-500">Platform revenue earned</dd></div>
+            </dl>
+          </div>
+
+          <div class="glass rounded-3xl p-6">
+            <div class="flex items-center justify-between">
+              <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-400">Revenue engine</h2>
+              <span class="flex items-center gap-1 text-xs text-lime-300"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-lime-400"></span> live</span>
+            </div>
+            <p class="mt-4 text-4xl font-black text-white">$1,566.16</p>
+            <p class="text-sm text-slate-400">collected in fees so far</p>
+            <div class="mt-6 grid grid-cols-2 gap-3 text-sm">
+              <div class="rounded-xl bg-white/5 p-3"><div class="text-xs text-slate-500">Last 7 days</div><div class="font-semibold text-white">$433.76</div></div>
+              <div class="rounded-xl bg-white/5 p-3"><div class="text-xs text-slate-500">Run rate / year</div><div class="font-semibold text-lime-300">$22,608.00</div></div>
+            </div>
+            <div class="mt-5 flex h-24 items-end gap-1.5">
+              <div class="flex flex-1 flex-col items-center gap-1"><div class="pulse-bar w-full rounded-t bg-lime-400/70" style="height:80px;animation-delay:0s"></div><span class="text-[9px] text-slate-500">stay</span></div>
+              <div class="flex flex-1 flex-col items-center gap-1"><div class="pulse-bar w-full rounded-t bg-lime-400/70" style="height:69px;animation-delay:.12s"></div><span class="text-[9px] text-slate-500">even</span></div>
+              <div class="flex flex-1 flex-col items-center gap-1"><div class="pulse-bar w-full rounded-t bg-lime-400/70" style="height:62px;animation-delay:.24s"></div><span class="text-[9px] text-slate-500">dini</span></div>
+              <div class="flex flex-1 flex-col items-center gap-1"><div class="pulse-bar w-full rounded-t bg-lime-400/70" style="height:50px;animation-delay:.36s"></div><span class="text-[9px] text-slate-500">spor</span></div>
+              <div class="flex flex-1 flex-col items-center gap-1"><div class="pulse-bar w-full rounded-t bg-lime-400/70" style="height:42px;animation-delay:.48s"></div><span class="text-[9px] text-slate-500">well</span></div>
+              <div class="flex flex-1 flex-col items-center gap-1"><div class="pulse-bar w-full rounded-t bg-lime-400/70" style="height:34px;animation-delay:.6s"></div><span class="text-[9px] text-slate-500">lear</span></div>
+            </div>
+            <a href="./revenue/" class="mt-5 block rounded-xl border border-white/10 py-2.5 text-center text-sm font-medium text-slate-300 transition hover:border-lime-400/40 hover:text-white">Open the full revenue dashboard →</a>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-bold">How a transfer works</h2>
+          <div class="mt-6 grid gap-4 md:grid-cols-3">
+            <div class="glass rounded-2xl p-5"><div class="font-mono text-xs text-lime-400">01</div><h3 class="mt-3 font-semibold text-white">List the booking you can't use</h3><p class="mt-2 text-sm leading-relaxed text-slate-400">Paste the venue, time and what you paid. Standby prices it against comparable last-minute demand and publishes it in seconds.</p></div>
+            <div class="glass rounded-2xl p-5"><div class="font-mono text-xs text-lime-400">02</div><h3 class="mt-3 font-semibold text-white">Buyers claim it, money sits in escrow</h3><p class="mt-2 text-sm leading-relaxed text-slate-400">A buyer pays the discounted price into Standby escrow. You keep ownership until the handoff is confirmed.</p></div>
+            <div class="glass rounded-2xl p-5"><div class="font-mono text-xs text-lime-400">03</div><h3 class="mt-3 font-semibold text-white">Escrow releases itself</h3><p class="mt-2 text-sm leading-relaxed text-slate-400">Three hours after the booking window closes, eligible funds release to the seller automatically, while exceptions stay visible for review.</p></div>
+          </div>
+        </section>
+
+        <section class="grid gap-6 rounded-3xl border border-white/10 bg-white/[0.03] p-8 lg:grid-cols-2">
+          <div>
+            <h2 class="text-2xl font-bold">Why nobody has built this</h2>
+            <p class="mt-3 text-slate-400">Ticket resale exists for stadium shows. Hotel resale doesn't — because the hard part isn't the listing, it's the <em>handoff</em>. Standby solves it with a transfer-code protocol and time-based escrow designed to automate the routine path while keeping exceptions explicit:</p>
+            <ul class="mt-4 space-y-2 text-sm text-slate-300">
+              <li>• Escrow auto-releases 3 hours after the booking window when no exception is raised.</li>
+              <li>• Listings auto-expire the moment the reservation starts — no stale inventory.</li>
+              <li>• Ledger events separate escrow, sales, boosts, refunds and payouts for auditable reconciliation.</li>
+            </ul>
+          </div>
+          <div class="grid grid-cols-2 gap-3 self-center">
+            <div class="rounded-2xl border border-white/10 bg-ink-900 p-4"><div class="text-2xl font-black text-lime-400">12%</div><div class="mt-1 text-xs text-slate-400">Platform fee per transfer</div></div>
+            <div class="rounded-2xl border border-white/10 bg-ink-900 p-4"><div class="text-2xl font-black text-lime-400">$1.99</div><div class="mt-1 text-xs text-slate-400">Optional 24h priority boost</div></div>
+            <div class="rounded-2xl border border-white/10 bg-ink-900 p-4"><div class="text-2xl font-black text-lime-400">Auto</div><div class="mt-1 text-xs text-slate-400">Routine settlement path</div></div>
+            <div class="rounded-2xl border border-white/10 bg-ink-900 p-4"><div class="text-2xl font-black text-lime-400">14</div><div class="mt-1 text-xs text-slate-400">Live bookings right now</div></div>
+          </div>
+        </section>
+
+        <section id="live">
+          <div class="flex items-end justify-between">
+            <div><h2 class="text-2xl font-bold">Live on Standby</h2><p class="mt-1 text-sm text-slate-400">Grab it before the clock runs out.</p></div>
+            <a href="./browse/" class="text-sm font-medium text-lime-300 hover:text-lime-200">See all →</a>
+          </div>
+          <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <a href="./browse/" class="group glass flex flex-col gap-3 rounded-2xl p-4 transition hover:border-lime-400/40 hover:bg-white/[0.06]">
+              <div class="flex items-start justify-between gap-3"><div class="flex items-center gap-2 text-xs text-slate-400"><span class="grid h-7 w-7 place-items-center rounded-lg bg-white/5 text-sm">🏨</span><span>Hotels &amp; Stays</span></div><span class="shrink-0 rounded-full bg-lime-400 px-2 py-0.5 text-xs font-bold text-ink-950">−40%</span></div>
+              <div><h3 class="line-clamp-2 font-semibold leading-snug text-white group-hover:text-lime-300">Boutique king room, 2 nights</h3><p class="mt-1 truncate text-sm text-slate-400">Hotel Vela · San Francisco</p></div>
+              <div class="mt-auto flex items-end justify-between pt-2"><div><div class="text-xl font-bold text-white">$410.00</div><div class="text-xs text-slate-500 line-through">$680.00</div></div><div class="text-right text-xs"><div class="font-mono text-lime-300">1d 6h</div><div class="text-slate-500">until it starts</div></div></div>
+              <div class="flex items-center justify-between border-t border-white/5 pt-2 text-[11px] text-slate-500"><span>2 guests</span><span class="text-amber-300">⚡ Boosted</span></div>
+            </a>
+            <a href="./browse/" class="group glass flex flex-col gap-3 rounded-2xl p-4 transition hover:border-lime-400/40 hover:bg-white/[0.06]">
+              <div class="flex items-start justify-between gap-3"><div class="flex items-center gap-2 text-xs text-slate-400"><span class="grid h-7 w-7 place-items-center rounded-lg bg-white/5 text-sm">🍽️</span><span>Dining &amp; Tastings</span></div><span class="shrink-0 rounded-full bg-lime-400 px-2 py-0.5 text-xs font-bold text-ink-950">−38%</span></div>
+              <div><h3 class="line-clamp-2 font-semibold leading-snug text-white group-hover:text-lime-300">Chef's counter tasting menu</h3><p class="mt-1 truncate text-sm text-slate-400">Ember &amp; Ash · Austin</p></div>
+              <div class="mt-auto flex items-end justify-between pt-2"><div><div class="text-xl font-bold text-white">$260.00</div><div class="text-xs text-slate-500 line-through">$420.00</div></div><div class="text-right text-xs"><div class="font-mono text-lime-300">14h</div><div class="text-slate-500">until it starts</div></div></div>
+              <div class="flex items-center justify-between border-t border-white/5 pt-2 text-[11px] text-slate-500"><span>2 guests</span><span>41 views</span></div>
+            </a>
+            <a href="./browse/" class="group glass flex flex-col gap-3 rounded-2xl p-4 transition hover:border-lime-400/40 hover:bg-white/[0.06]">
+              <div class="flex items-start justify-between gap-3"><div class="flex items-center gap-2 text-xs text-slate-400"><span class="grid h-7 w-7 place-items-center rounded-lg bg-white/5 text-sm">🎟️</span><span>Events &amp; Shows</span></div><span class="shrink-0 rounded-full bg-lime-400 px-2 py-0.5 text-xs font-bold text-ink-950">−31%</span></div>
+              <div><h3 class="line-clamp-2 font-semibold leading-snug text-white group-hover:text-lime-300">Orchestra seats, symphony premiere</h3><p class="mt-1 truncate text-sm text-slate-400">Meridian Hall · New York</p></div>
+              <div class="mt-auto flex items-end justify-between pt-2"><div><div class="text-xl font-bold text-white">$215.00</div><div class="text-xs text-slate-500 line-through">$310.00</div></div><div class="text-right text-xs"><div class="font-mono text-lime-300">2d 4h</div><div class="text-slate-500">until it starts</div></div></div>
+              <div class="flex items-center justify-between border-t border-white/5 pt-2 text-[11px] text-slate-500"><span>2 guests</span><span>70 views</span></div>
+            </a>
+            <a href="./browse/" class="group glass flex flex-col gap-3 rounded-2xl p-4 transition hover:border-lime-400/40 hover:bg-white/[0.06]">
+              <div class="flex items-start justify-between gap-3"><div class="flex items-center gap-2 text-xs text-slate-400"><span class="grid h-7 w-7 place-items-center rounded-lg bg-white/5 text-sm">⛳</span><span>Sport &amp; Outdoors</span></div><span class="shrink-0 rounded-full bg-lime-400 px-2 py-0.5 text-xs font-bold text-ink-950">−39%</span></div>
+              <div><h3 class="line-clamp-2 font-semibold leading-snug text-white group-hover:text-lime-300">Sunset catamaran charter</h3><p class="mt-1 truncate text-sm text-slate-400">Biscayne Sailing Co. · Miami</p></div>
+              <div class="mt-auto flex items-end justify-between pt-2"><div><div class="text-xl font-bold text-white">$580.00</div><div class="text-xs text-slate-500 line-through">$950.00</div></div><div class="text-right text-xs"><div class="font-mono text-lime-300">20h</div><div class="text-slate-500">until it starts</div></div></div>
+              <div class="flex items-center justify-between border-t border-white/5 pt-2 text-[11px] text-slate-500"><span>6 guests</span><span>99 views</span></div>
+            </a>
+            <a href="./browse/" class="group glass flex flex-col gap-3 rounded-2xl p-4 transition hover:border-lime-400/40 hover:bg-white/[0.06]">
+              <div class="flex items-start justify-between gap-3"><div class="flex items-center gap-2 text-xs text-slate-400"><span class="grid h-7 w-7 place-items-center rounded-lg bg-white/5 text-sm">💆</span><span>Wellness &amp; Spa</span></div><span class="shrink-0 rounded-full bg-lime-400 px-2 py-0.5 text-xs font-bold text-ink-950">−38%</span></div>
+              <div><h3 class="line-clamp-2 font-semibold leading-snug text-white group-hover:text-lime-300">Couples spa suite + massage</h3><p class="mt-1 truncate text-sm text-slate-400">Cedar &amp; Salt Spa · Seattle</p></div>
+              <div class="mt-auto flex items-end justify-between pt-2"><div><div class="text-xl font-bold text-white">$210.00</div><div class="text-xs text-slate-500 line-through">$340.00</div></div><div class="text-right text-xs"><div class="font-mono text-lime-300">1d 20h</div><div class="text-slate-500">until it starts</div></div></div>
+              <div class="flex items-center justify-between border-t border-white/5 pt-2 text-[11px] text-slate-500"><span>2 guests</span><span>128 views</span></div>
+            </a>
+            <a href="./browse/" class="group glass flex flex-col gap-3 rounded-2xl p-4 transition hover:border-lime-400/40 hover:bg-white/[0.06]">
+              <div class="flex items-start justify-between gap-3"><div class="flex items-center gap-2 text-xs text-slate-400"><span class="grid h-7 w-7 place-items-center rounded-lg bg-white/5 text-sm">🎓</span><span>Classes &amp; Workshops</span></div><span class="shrink-0 rounded-full bg-lime-400 px-2 py-0.5 text-xs font-bold text-ink-950">−42%</span></div>
+              <div><h3 class="line-clamp-2 font-semibold leading-snug text-white group-hover:text-lime-300">Private pottery wheel class</h3><p class="mt-1 truncate text-sm text-slate-400">Kiln House Studio · Chicago</p></div>
+              <div class="mt-auto flex items-end justify-between pt-2"><div><div class="text-xl font-bold text-white">$70.00</div><div class="text-xs text-slate-500 line-through">$120.00</div></div><div class="text-right text-xs"><div class="font-mono text-lime-300">2d 18h</div><div class="text-slate-500">until it starts</div></div></div>
+              <div class="flex items-center justify-between border-t border-white/5 pt-2 text-[11px] text-slate-500"><span>1 guest</span><span>157 views</span></div>
+            </a>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="border-t border-white/10 py-8">
+      <div class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+        <span>© 2026 Standby Technologies — demo marketplace with simulated money.</span>
+        <span>Platform fee 12% · Boost $1.99 · Auto-release 3h after the booking window</span>
+      </div>
+    </footer>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
