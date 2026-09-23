@@ -6,7 +6,6 @@ import type { ListingWithSeller } from "@/lib/market";
 export function ListingCard({ listing }: { listing: ListingWithSeller }) {
   const meta = categoryMeta(listing.category);
   const off = discountPercent(listing.faceValueCents, listing.priceCents);
-  const boosted = listing.boostedUntil && listing.boostedUntil.getTime() > Date.now();
 
   return (
     <Link
@@ -51,7 +50,7 @@ export function ListingCard({ listing }: { listing: ListingWithSeller }) {
 
       <div className="flex items-center justify-between border-t border-white/5 pt-2 text-[11px] text-slate-500">
         <span>{listing.partySize} {listing.partySize === 1 ? "guest" : "guests"}</span>
-        {boosted ? (
+        {listing.isBoosted ? (
           <span className="text-amber-300">⚡ Boosted</span>
         ) : (
           <span>{listing.views} views</span>
