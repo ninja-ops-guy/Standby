@@ -123,6 +123,37 @@ export async function addDisputeEvidence(input: {
     throw new Error("Dispute evidence digest must be SHA-256 hex.");
   }
 
+  const [access] = await db
+    .select({
+      buyerId: marketplaceTransactions.buyerId,
+      sellerId: marketplaceTransactions.sellerId,
+    })
+    .from(disputes)
+    .innerJoin(
+      marketplaceTransactions,
+      eq(marketplaceTransactions.id, disputes.marketplaceTransactionId),
+    )
+    .where(eq(disputes.id, input.disputeId))
+    .limit(1);
+
+  if (!access) throw new Error("Dispute not found.");
+
+  const participant = [access.buyerId, access.sellerId].includes(input.submittedByUserId);
+  const operator = await db
+    .select({ id: userRoles.id })
+    .from(userRoles)
+    .where(
+      and(
+        eq(userRoles.userId, input.submittedByUserId),
+        inArray(userRoles.role, ["operator", "admin"]),
+      ),
+    )
+    .limit(1);
+
+  if (!participant && !operator[0]) {
+    throw new Error("Only a transaction participant or operator can submit dispute evidence.");
+  }
+
   const [row] = await db
     .insert(disputeEvidence)
     .values({
@@ -335,6 +366,111 @@ export async function suspendListing(input: {
       metadataJson: JSON.stringify({ reason: input.reason }),
     });
     return restriction;
+  });
+}
+
+export async function resolveDispute(input: {
+  disputeId: number;
+  outcome: "buyer" | "seller" | "cancelled";
+  operatorUserId: number;
+  resolution: string;
+  correlationId: string;
+}) {
+  await assertOperatorUser(input.operatorUserId);
+
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({
+        dispute: disputes,
+        transaction: marketplaceTransactions,
+      })
+      .from(disputes)
+      .innerJoin(
+        marketplaceTransactions,
+        eq(marketplaceTransactions.id, disputes.marketplaceTransactionId),
+      )
+      .where(eq(disputes.id, input.disputeId))
+      .limit(1);
+
+    if (!row) throw new Error("Dispute not found.");
+    if (!["open", "evidence_requested", "under_review"].includes(row.dispute.status)) {
+      throw new Error("Dispute is not open for resolution.");
+    }
+
+    if (input.outcome === "buyer") {
+      const [refund] = await tx
+        .select({ status: refundDecisions.status })
+        .from(refundDecisions)
+        .where(eq(refundDecisions.marketplaceTransactionId, row.transaction.id))
+        .limit(1);
+
+      if (!refund || refund.status !== "executed") {
+        throw new Error("Buyer-favor resolution requires an executed refund.");
+      }
+    }
+
+    if (input.outcome === "seller") {
+      const [activeHold] = await tx
+        .select({ id: payoutHolds.id })
+        .from(payoutHolds)
+        .where(
+          and(
+            eq(payoutHolds.marketplaceTransactionId, row.transaction.id),
+            eq(payoutHolds.status, "active"),
+          ),
+        )
+        .limit(1);
+
+      if (activeHold) {
+        await tx
+          .update(payoutHolds)
+          .set({
+            status: "released",
+            releasedByUserId: input.operatorUserId,
+            releasedAt: new Date(),
+          })
+          .where(and(eq(payoutHolds.id, activeHold.id), eq(payoutHolds.status, "active")));
+      }
+    }
+
+    const nextStatus =
+      input.outcome === "buyer"
+        ? "resolved_buyer"
+        : input.outcome === "seller"
+          ? "resolved_seller"
+          : "cancelled";
+
+    const [resolved] = await tx
+      .update(disputes)
+      .set({
+        status: nextStatus,
+        resolution: input.resolution,
+        resolvedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(disputes.id, row.dispute.id),
+          inArray(disputes.status, ["open", "evidence_requested", "under_review"]),
+        ),
+      )
+      .returning();
+
+    if (!resolved) throw new Error("Dispute changed before resolution.");
+
+    await tx.insert(auditEvents).values({
+      actorUserId: input.operatorUserId,
+      action: "dispute.resolve",
+      targetType: "dispute",
+      targetId: String(input.disputeId),
+      correlationId: input.correlationId,
+      metadataJson: JSON.stringify({
+        outcome: input.outcome,
+        resolution: input.resolution,
+      }),
+    });
+
+    return resolved;
   });
 }
 
