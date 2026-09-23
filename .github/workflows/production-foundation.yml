@@ -2,14 +2,6 @@ name: Production Foundation Qualification
 
 on:
   pull_request:
-    paths:
-      - "src/db/schema.ts"
-      - "src/lib/ledger.ts"
-      - "src/lib/production-transactions.ts"
-      - "src/lib/transaction-state.ts"
-      - "scripts/qualify-transaction-*.mjs"
-      - "package.json"
-      - ".github/workflows/production-foundation.yml"
   push:
     branches:
       - main
