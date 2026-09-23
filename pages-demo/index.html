@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070b16" />
+  <meta name="description" content="Standby — a marketplace for prepaid bookings you can no longer use." />
+  <title>Standby — Reservation Resale Marketplace</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="aurora aurora-a"></div>
+  <div class="aurora aurora-b"></div>
+
+  <header class="nav shell">
+    <a class="brand" href="#top" aria-label="Standby home">
+      <span class="brand-mark">SB</span>
+      <span>Standby</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#marketplace">Browse</a>
+      <a href="#how">How it works</a>
+      <a href="#economics">Economics</a>
+      <a href="https://github.com/ninja-ops-guy/Standby">Source</a>
+    </nav>
+    <a class="button button-small" href="#marketplace">Explore demo</a>
+  </header>
+
+  <main id="top">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="dot"></span> Static product demo · no real payments</div>
+        <h1>Your non-refundable booking is <span>worth something.</span></h1>
+        <p class="hero-text">
+          Standby is a marketplace concept for unused prepaid reservations. Sellers recover value,
+          buyers get last-minute discounts, and the platform models escrow, settlement, fees, boosts,
+          refunds, and payouts.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="#marketplace">Browse demo bookings</a>
+          <a class="button button-secondary" href="https://github.com/ninja-ops-guy/Standby">View repository</a>
+        </div>
+        <div class="metric-row" aria-label="Marketplace metrics">
+          <div><strong>$48.6k</strong><span>demo GMV</span></div>
+          <div><strong>41%</strong><span>avg. discount</span></div>
+          <div><strong>$6.1k</strong><span>demo fee revenue</span></div>
+        </div>
+      </div>
+
+      <aside class="revenue-card">
+        <div class="card-topline">
+          <span>Revenue engine</span>
+          <span class="live"><i></i> demo</span>
+        </div>
+        <strong class="revenue-total">$6,146.72</strong>
+        <span class="muted">simulated platform fees</span>
+        <div class="mini-grid">
+          <div><span>7 day</span><strong>$1,108</strong></div>
+          <div><span>annualized</span><strong>$57.8k</strong></div>
+        </div>
+        <div class="bars" aria-hidden="true">
+          <i style="--h:38%"></i><i style="--h:61%"></i><i style="--h:46%"></i><i style="--h:74%"></i>
+          <i style="--h:55%"></i><i style="--h:89%"></i><i style="--h:68%"></i><i style="--h:96%"></i>
+        </div>
+        <div class="fineprint">Completed sales count once; escrow holds are tracked separately.</div>
+      </aside>
+    </section>
+
+    <section id="marketplace" class="shell section">
+      <div class="section-heading">
+        <div>
+          <span class="kicker">Live demo inventory</span>
+          <h2>Bookings on Standby</h2>
+        </div>
+        <div class="filters" role="group" aria-label="Booking filters">
+          <button class="filter active" data-filter="all">All</button>
+          <button class="filter" data-filter="stay">Stays</button>
+          <button class="filter" data-filter="dining">Dining</button>
+          <button class="filter" data-filter="events">Events</button>
+          <button class="filter" data-filter="wellness">Wellness</button>
+          <button class="filter" data-filter="sport">Sport</button>
+        </div>
+      </div>
+
+      <div class="listing-grid" id="listingGrid">
+        <article class="listing" data-category="stay">
+          <div class="listing-top"><span class="category">🏨 Stay</span><span class="discount">-40%</span></div>
+          <h3>Boutique king room, 2 nights</h3>
+          <p>Hotel Vela · San Francisco</p>
+          <div class="price-line"><strong>$410</strong><span>$680</span></div>
+          <div class="listing-meta"><span>2 guests</span><span>starts in 1d 6h</span></div>
+          <button class="claim" data-title="Boutique king room, 2 nights" data-price="$410">Preview claim</button>
+        </article>
+
+        <article class="listing" data-category="dining">
+          <div class="listing-top"><span class="category">🍽️ Dining</span><span class="discount">-38%</span></div>
+          <h3>Chef's counter tasting menu</h3>
+          <p>Ember & Ash · Austin</p>
+          <div class="price-line"><strong>$260</strong><span>$420</span></div>
+          <div class="listing-meta"><span>2 guests</span><span>starts in 14h</span></div>
+          <button class="claim" data-title="Chef's counter tasting menu" data-price="$260">Preview claim</button>
+        </article>
+
+        <article class="listing" data-category="events">
+          <div class="listing-top"><span class="category">🎟️ Event</span><span class="discount">-31%</span></div>
+          <h3>Orchestra seats, symphony premiere</h3>
+          <p>Meridian Hall · New York</p>
+          <div class="price-line"><strong>$215</strong><span>$310</span></div>
+          <div class="listing-meta"><span>2 guests</span><span>starts in 2d 4h</span></div>
+          <button class="claim" data-title="Orchestra seats" data-price="$215">Preview claim</button>
+        </article>
+
+        <article class="listing" data-category="sport">
+          <div class="listing-top"><span class="category">⛵ Sport</span><span class="discount">-39%</span></div>
+          <h3>Sunset catamaran charter</h3>
+          <p>Biscayne Sailing Co. · Miami</p>
+          <div class="price-line"><strong>$580</strong><span>$950</span></div>
+          <div class="listing-meta"><span>6 guests</span><span>starts in 20h</span></div>
+          <button class="claim" data-title="Sunset catamaran charter" data-price="$580">Preview claim</button>
+        </article>
+
+        <article class="listing" data-category="wellness">
+          <div class="listing-top"><span class="category">💆 Wellness</span><span class="discount">-38%</span></div>
+          <h3>Couples spa suite + massage</h3>
+          <p>Cedar & Salt Spa · Seattle</p>
+          <div class="price-line"><strong>$210</strong><span>$340</span></div>
+          <div class="listing-meta"><span>2 guests</span><span>starts in 1d 20h</span></div>
+          <button class="claim" data-title="Couples spa suite + massage" data-price="$210">Preview claim</button>
+        </article>
+
+        <article class="listing" data-category="sport">
+          <div class="listing-top"><span class="category">⛳ Sport</span><span class="discount">-41%</span></div>
+          <h3>Tee time for four, mountain course</h3>
+          <p>Granite Ridge GC · Denver</p>
+          <div class="price-line"><strong>$270</strong><span>$460</span></div>
+          <div class="listing-meta"><span>4 guests</span><span>starts in 1d 14h</span></div>
+          <button class="claim" data-title="Tee time for four" data-price="$270">Preview claim</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="how" class="shell section">
+      <span class="kicker">Marketplace state machine</span>
+      <h2>How a transfer works</h2>
+      <div class="steps">
+        <article><span>01</span><h3>List</h3><p>The seller publishes a prepaid booking with its face value, asking price, date, and transfer details.</p></article>
+        <article><span>02</span><h3>Hold</h3><p>A buyer claims the listing. Funds move into an escrow hold rather than being counted as completed revenue.</p></article>
+        <article><span>03</span><h3>Transfer</h3><p>The booking changes hands using the provider-supported handoff method or transfer code.</p></article>
+        <article><span>04</span><h3>Settle</h3><p>Once complete, one sale event records GMV, the seller net, and the platform fee.</p></article>
+      </div>
+    </section>
+
+    <section id="economics" class="shell section economics">
+      <div>
+        <span class="kicker">Unit economics</span>
+        <h2>Simple fee model, explicit ledger states.</h2>
+        <p>
+          The product prototype charges a 12% platform fee on completed transfers and optionally
+          supports a $1.99 placement boost. The real application repository includes transactional
+          claim, cancellation, refund, payout, and settlement paths backed by PostgreSQL.
+        </p>
+        <a class="text-link" href="https://github.com/ninja-ops-guy/Standby">Inspect the implementation →</a>
+      </div>
+      <div class="economics-card">
+        <div><span>Buyer pays</span><strong>$100.00</strong></div>
+        <div><span>Escrow hold</span><strong>$100.00</strong></div>
+        <div><span>Platform fee</span><strong>$12.00</strong></div>
+        <div><span>Seller receives</span><strong>$88.00</strong></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell footer">
+    <div>
+      <strong>Standby</strong>
+      <p>Static GitHub Pages demo. No real bookings, payments, authentication, or financial custody occur here.</p>
+    </div>
+    <a href="https://github.com/ninja-ops-guy/Standby">GitHub repository</a>
+  </footer>
+
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+      <span class="kicker">Interactive demo</span>
+      <h2 id="modalTitle">Preview claim</h2>
+      <p id="modalCopy"></p>
+      <div class="demo-ledger">
+        <div><span>Wallet</span><strong id="walletBefore">$1,000.00</strong></div>
+        <div><span>Escrow hold</span><strong id="escrowAmount">$0.00</strong></div>
+        <div><span>Recognized revenue</span><strong>$0.00</strong></div>
+      </div>
+      <button class="button modal-action" id="simulateClaim">Simulate escrow hold</button>
+      <p class="fineprint">This interaction is local-only and resets when the page reloads.</p>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
