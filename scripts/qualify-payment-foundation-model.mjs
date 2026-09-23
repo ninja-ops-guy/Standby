@@ -49,8 +49,8 @@ assert.match(store, /Provider event ID replayed with different signed content/);
 assert.match(store, /dead_letter/);
 assert.match(store, /recordReconciliationFinding/);
 
-const verifyIndex = route.indexOf("verifyWebhook");
-const recordIndex = route.indexOf("recordVerifiedWebhookEvent");
+const verifyIndex = route.indexOf("await provider.verifyWebhook");
+const recordIndex = route.indexOf("await recordVerifiedWebhookEvent");
 assert.ok(verifyIndex >= 0 && recordIndex > verifyIndex, "webhook must verify before durable ingestion");
 
 console.log("payment-foundation structural qualification: PASS");
