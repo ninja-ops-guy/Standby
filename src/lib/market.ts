@@ -23,6 +23,8 @@ export type ListingWithSeller = {
   views: number;
   createdAt: Date;
   boostedUntil: Date | null;
+  isBoosted: boolean;
+  ageHours: number;
   sellerId: number;
   sellerName: string;
   buyerId: number | null;
@@ -44,6 +46,8 @@ const listingColumns = {
   views: listings.views,
   createdAt: listings.createdAt,
   boostedUntil: listings.boostedUntil,
+  isBoosted: sql<boolean>`coalesce(${listings.boostedUntil} > now(), false)`,
+  ageHours: sql<number>`greatest(1, floor(extract(epoch from (now() - ${listings.createdAt})) / 3600))::int`,
   sellerId: listings.sellerId,
   sellerName: users.name,
   buyerId: listings.buyerId,
